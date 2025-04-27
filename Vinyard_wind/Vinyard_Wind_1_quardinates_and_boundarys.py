@@ -1,49 +1,38 @@
 import numpy as np
+import py_wake
 import geopandas as gpd
 from pyproj import Transformer
 import matplotlib.pyplot as plt
 import pandas as pd
+from py_wake import GenericWindTurbine
+from py_wake import NOJ
+from py_wake.site._site import UniformWeibullSite
 
 
-class Vinyard1WindRoseData:
-    def __init__(self):
-    
-        self.csv_path = "E:\Spring 2025\ENGIN 480\Porject_4\Project_4_Engin_480_kalogeras_Trin\Vinyard_wind\windPowerRose.csv"
+# class Vinyard1WindRoseData:
+#     def __init__(self):
+#         self.csv_path = "E:/Spring 2025/ENGIN 480/Porject_4/Project_4_Engin_480_kalogeras_Trin/Vinyard_wind/windPowerRose.csv"
         
-        # Data containers
-        self.ws = None  # Wind speeds
-        self.wd = None  # Wind directions
-        self.freq = None  # Frequency matrix
+#         self.wd = None  # Wind directions
+#         self.freq = None  # Frequencies
+        
+#         self._load_data()
 
-        # Load data
-        self._load_data()
+#     def _load_data(self):
+#         df = pd.read_csv(self.csv_path)
 
-    def _load_data(self):
-    # Load CSV
-        df = pd.read_csv(self.csv_path)
+#         # Debug: print the columns
+#         print("Columns in CSV:", df.columns)
 
-    # Strip any extra spaces in the column names
-        df.columns = df.columns.str.strip()
+#         # Get the center degrees (wind direction) and value (frequency)
+#         self.wd = df['center_degrees'].to_numpy()
+#         self.freq = df['value'].to_numpy()
 
-    # Print column names to debug
-        print("Columns in CSV:", df.columns)
-
-    # Pivot the table (ensure the correct column names are used)
-        wind_rose = df.pivot(index='Wind direction [°]',
-                         columns='Wind speed [m/s]',
-                         values='Frequency [%]').fillna(0)
-
-    # Store data
-        self.wd = wind_rose.index.to_numpy()
-        self.ws = wind_rose.columns.to_numpy()
-        self.freq = wind_rose.to_numpy()
-
-    def get_data(self):
-        """
-        Returns a tuple: (wind_directions, wind_speeds, frequency_matrix)
-        """
-        return self.wd, self.ws, self.freq
-
+#     def get_data(self):
+#         """
+#         Returns a tuple: (wind_directions, frequency)
+#         """
+#         return self.wd, self.freq
 
 
 
@@ -59,7 +48,7 @@ class VinyardWind_1:
         self.x = None
         self.y = None
         # How powerful the wind terbines are
-        self.turbine_capacity_mw = 13e6
+        # self.turbine_capacity_mw = 13e6
 
     def convert_to_utm(self):
         gdf = gpd.read_file(self.geojson_path)
@@ -115,7 +104,28 @@ class Vinyard_wind_boundarys:
 
     def get_utm(self):
         return self.utm_coords
+    
+class Haliade_X(GenericWindTurbine):
+    def __init__(self):
+        """
+        paramiters
+        __________
+        The turbulance intesity varies around 6-8%
+        """
+        GenericWindTurbine.__init__(self, name='Haliade-X', diameter=220, hub_height=150, 
+                                    power_norm=13000, turbulance_intesity=0.07)
 
+class VinyardWind1(UniformWeibullSite):
+    def __init__(self, ti=0.07, shear=PowerShear(h_ref=150, alpha=0.1)):
+        f = [644.52,   767.31,   647.53,   603.99,   487.86,   
+             450.63,   731.80,  1178.28,  1308.72,  1119.76,  1113.51,   946.10]
+        a = [10.26,    10.44,     9.52,     8.96,     9.58,
+             9.72,    11.48 ,   13.25,    12.46,    11.40,    12.35,    10.48]
+        k = [ 2.225,    1.697,    1.721,    1.689 ,   1.525  ,  1.498 ,
+                1.686,    2.143 ,   2.369   , 2.186    ,2.385   , 2.404]
+        UniformWeibullSite.__init__(self, np.array(f) / np.sum(f), a, k, ti=ti, shear=shear)
+        self.initial_position = np.array([xinit, yinit]).T
+        self.name = 'Vinyard Wind Farm'
 
 # Main execution
 site = VinyardWind_1()
@@ -140,10 +150,10 @@ plt.show()
 
 
 # Instantiate the class to load the data
-data = Vinyard1WindRoseData()
+# data = Vinyard1WindRoseData()
 
 # Get the data
-wd, ws, freq = data.get_data()
+wd, freq = data.get_data()
 
 # Plotting the wind rose
 fig, ax = plt.subplots(figsize=(10, 8), subplot_kw={'projection': 'polar'})
