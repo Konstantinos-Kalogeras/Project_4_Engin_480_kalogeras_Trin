@@ -4,9 +4,10 @@ import geopandas as gpd
 from pyproj import Transformer
 import matplotlib.pyplot as plt
 import pandas as pd
-from py_wake import GenericWindTurbine
+from py_wake.wind_turbines import generic_wind_turbines
 from py_wake import NOJ
-from py_wake.site._site import UniformWeibullSite
+from py_wake.site._site import UniformWeibullSite, PowerShear
+from py_wake.flow_map import HorizontalGrid
 
 
 # class Vinyard1WindRoseData:
@@ -47,8 +48,6 @@ class VinyardWind_1:
         self.geojson_path = geojson_path
         self.x = None
         self.y = None
-        # How powerful the wind terbines are
-        # self.turbine_capacity_mw = 13e6
 
     def convert_to_utm(self):
         gdf = gpd.read_file(self.geojson_path)
@@ -105,14 +104,14 @@ class Vinyard_wind_boundarys:
     def get_utm(self):
         return self.utm_coords
     
-class Haliade_X(GenericWindTurbine):
+class Haliade_X(generic_wind_turbines):
     def __init__(self):
         """
         paramiters
         __________
         The turbulance intesity varies around 6-8%
         """
-        GenericWindTurbine.__init__(self, name='Haliade-X', diameter=220, hub_height=150, 
+        generic_wind_turbines.__init__(self, name='Haliade-X', diameter=220, hub_height=150, 
                                     power_norm=13000, turbulance_intesity=0.07)
 
 class VinyardWind1(UniformWeibullSite):
@@ -124,18 +123,31 @@ class VinyardWind1(UniformWeibullSite):
         k = [ 2.225,    1.697,    1.721,    1.689 ,   1.525  ,  1.498 ,
                 1.686,    2.143 ,   2.369   , 2.186    ,2.385   , 2.404]
         UniformWeibullSite.__init__(self, np.array(f) / np.sum(f), a, k, ti=ti, shear=shear)
-        self.initial_position = np.array([xinit, yinit]).T
+        self.initial_position = np.array([site.x, site.y]).T
         self.name = 'Vinyard Wind Farm'
 
 # Main execution
 site = VinyardWind_1()
 boundary = Vinyard_wind_boundarys()
+wind_rose_data = VinyardWind1()
+Turbine = Haliade_X()
 
+sim_res = NOJ(site, Turbine)
 site.convert_to_utm()
 x, y = site.get_coordinates()
 boundary_x, boundary_y = zip(*boundary.get_utm())
 
-# Plotting
+sim_res = NOJ(site, Turbine)
+
+electrical_power = sim_res(x, y).Power
+
+# electrical_power.isel(wt = 2, wd = 330, ws = 7)
+
+aep = sim_res(x,y).aep().sum()
+
+print('Total AEP production: ',aep, 'GW')
+
+# Plotting quordinates with boundarys of site 
 plt.figure(figsize=(10, 8))
 plt.scatter(x, y, color='green', label='Turbine Positions')
 plt.plot(boundary_x, boundary_y, color='blue', label='Project Boundary')
@@ -150,30 +162,30 @@ plt.show()
 
 
 # Instantiate the class to load the data
-# data = Vinyard1WindRoseData()
+# # data = Vinyard1WindRoseData()
 
-# Get the data
-wd, freq = data.get_data()
+# # Get the data
+# wd, freq = data.get_data()
 
-# Plotting the wind rose
-fig, ax = plt.subplots(figsize=(10, 8), subplot_kw={'projection': 'polar'})
+# # Plotting the wind rose
+# fig, ax = plt.subplots(figsize=(10, 8), subplot_kw={'projection': 'polar'})
 
-# Create a meshgrid for plotting
-ws_grid, wd_grid = np.meshgrid(ws, wd)
+# # Create a meshgrid for plotting
+# ws_grid, wd_grid = np.meshgrid(ws, wd)
 
-# Convert wind direction to radians for polar plotting
-wd_rad = np.radians(wd_grid)
+# # Convert wind direction to radians for polar plotting
+# wd_rad = np.radians(wd_grid)
 
-# Plot the frequency as a pcolormesh plot
-c = ax.pcolormesh(wd_rad, ws_grid, freq, shading='auto', cmap='viridis')
+# # Plot the frequency as a pcolormesh plot
+# c = ax.pcolormesh(wd_rad, ws_grid, freq, shading='auto', cmap='viridis')
 
-# Adding color bar
-fig.colorbar(c, ax=ax, label="Frequency [%]")
+# # Adding color bar
+# fig.colorbar(c, ax=ax, label="Frequency [%]")
 
-# Set labels and title
-ax.set_xlabel('Wind Direction [°]')
-ax.set_ylabel('Wind Speed [m/s]')
-ax.set_title('Wind Rose - Frequency of Wind Speeds by Direction')
+# # Set labels and title
+# ax.set_xlabel('Wind Direction [°]')
+# ax.set_ylabel('Wind Speed [m/s]')
+# ax.set_title('Wind Rose - Frequency of Wind Speeds by Direction')
 
-# Show the plot
-plt.show()
+# # Show the plot
+# plt.show()
