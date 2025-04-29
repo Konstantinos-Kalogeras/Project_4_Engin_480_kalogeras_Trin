@@ -4,7 +4,7 @@ from shapely.geometry import LineString                         # Manipulation a
 import pyproj                                                   # Cartographic projections and coordinates transformation
 import os                                                       # Handles UNIX or NT operating system routines    
 import numpy as np                                              # Numerical python for enhanced vectorial/arrays operations
-import geojson                                               # Library with formatting for encoding geographic data structures
+import geojson                                                  # Library with formatting for encoding geographic data structures
 import sys                                                      # Access to variables and functions used by the Python interpreter
 import pickle 
 
@@ -142,8 +142,10 @@ def get_lat_long(filepath):
 wind_farms_europe = {
 
 ### USA
-    'VineyardWind1':                            'vineyardwind.geojson',             
-    # 'Revolutionwind_southforkwind':             'revolutionwind_southforkwind.geojson', 
+    'VineyardWind1':                            'positions_of_Vineyard_wind_1_turbines.geojson',             
+    'Revolutionwind_southforkwind':             'Revolution_shouth_fork_turbine_position.geojson', 
+    'CostalVirginiaWind':                       'costalvirginiawindposistions.geojson',
+    'Eneco_Luchterdunen':                       'eneco_lutherduinen_turbine_coordinates.geojson'
 
     
 }
@@ -220,6 +222,7 @@ def plot_bound(farm_names):
 
 
 def main():
+    plot_bound(farm_names)
     if __name__ == '__main__':
         plot_bound(farm_names)
 

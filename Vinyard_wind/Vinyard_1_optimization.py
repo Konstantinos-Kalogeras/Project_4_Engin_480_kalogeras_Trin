@@ -7,21 +7,25 @@ from topfarm.constraint_components.boundary import XYBoundaryConstraint
 from topfarm.constraint_components.spacing import SpacingConstraint
 import topfarm
 
-from py_wake.literature.gaussian_models import Bastankhah_PorteAgel_2014, Zong_PorteAgel_2020, Niayifar_PorteAgel_2016, CarbajoFuertes_etal_2018, Blondel_Cathelain_2020
+from py_wake.literature.gaussian_models import Bastankhah_PorteAgel_2014
 from py_wake.utils.gradients import autograd
-from py_wake.site._site import UniformWeibullSite
-from py_wake.wind_turbines.generic_wind_turbines import GenericWindTurbine
-from py_wake.site.shear import PowerShear
+# from py_wake.site._site import UniformWeibullSite
+# from py_wake.wind_turbines.generic_wind_turbines import GenericWindTurbine
+# from py_wake.site.shear import PowerShear
 import pickle
-from Vinyard_wind.Vinyard_Wind_1_quardinates_and_boundarys import VinyardWind2, Haliade_X
+import os
+from Vinyard_Wind_1_quardinates_and_boundarys import VinyardWind2, Haliade_X, Vinyard_wind_boundarys, VinyardWind_1
 
 
-with open('utm_boundary.pk1', 'rb') as f:
-    boundary = np.array(pickle.load(f))
+# with open('utm_boundary.pk1', 'rb') as f:
+#     boundary = np.array(pickle.load(f))
 
-with open('utm_layout.pk1', 'rb') as f:
-    xinit,yinit = np.array(pickle.load(f))
+# with open('utm_layout.pk1', 'rb') as f:
+#     xinit,yinit = np.array(pickle.load(f))
 
+x,y = VinyardWind_1().convert_to_utm()
+
+boundary = Vinyard_wind_boundarys().get_utm()
 
 maxiter = 1000
 tol = 1e-6
@@ -41,19 +45,19 @@ def aep_func(x,y):
 boundary_closed = np.vstack([boundary, boundary[0]])
 
 cost_comp = CostModelComponent(input_keys=['x', 'y'],
-                                          n_wt = len(xinit),
+                                          n_wt = len(x),
                                           cost_function = aep_func,
                                           objective=True,
                                           maximize=True,
                                           output_keys=[('AEP', 0)]
                                           )
     
-problem = TopFarmProblem(design_vars= {'x': xinit, 'y': yinit},
-                         constraints=[XYBoundaryConstraint(boundary),
+problem = TopFarmProblem(design_vars= {'x': x, 'y': y},
+                         constraints=[XYBoundaryConstraint(boundary_closed),
                                       SpacingConstraint(334)],
                         cost_comp=cost_comp,
-                        driver=EasyScipyOptimizeDriver(optimizer='SLSQP', maxiter=maxiter, tol=tol),
-                        n_wt=len(xinit),
+                        driver=EasyScipyOptimizeDriver(optimizer='SLSQP', maxiter=200, tol=tol),
+                        n_wt=len(x),
                         expected_cost=0.001,
                         plot_comp=XYPlotComp()
                         )
@@ -61,7 +65,7 @@ problem = TopFarmProblem(design_vars= {'x': xinit, 'y': yinit},
 
 cost, state, recorder = problem.optimize()
 
-recorder.save('optimization_revwind')
+recorder.save('optimization_Vinyard_wind')
 
 print('done')
 

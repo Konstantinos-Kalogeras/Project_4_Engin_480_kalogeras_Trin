@@ -8,6 +8,7 @@ from py_wake.wind_turbines.generic_wind_turbines import GenericWindTurbine
 from py_wake.literature.gaussian_models import Bastankhah_PorteAgel_2014
 from py_wake.site._site import UniformWeibullSite, PowerShear
 from py_wake.flow_map import HorizontalGrid
+import xarray
 
 
 # Class to handle the turbine positions
@@ -69,7 +70,7 @@ class Vinyard_wind_boundarys():
         self.latlon_coords = np.array(self.gdf.geometry.iloc[0].coords)
         utm_crs = self._get_utm_crs()
         self.gdf_utm = self.gdf.to_crs(utm_crs)
-        self.utm_coords = np.array(self.gdf_utm.geometry.iloc[0].coords)
+        self.utm_coords = xarray.array(self.gdf_utm.geometry.iloc[0].coords)
 
     def _get_utm_crs(self):
         centroid = self.gdf.geometry.centroid.iloc[0]
