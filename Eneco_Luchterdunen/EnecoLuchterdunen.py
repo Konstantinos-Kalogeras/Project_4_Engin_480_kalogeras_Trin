@@ -65,8 +65,8 @@ class EnedoLuchterdunenBoundatrys:
     def get_latlon(self):
         return self.latlon_coords
 
-    def get_utm(self):
-        return self.utm_coords
+    # def get_utm(self):
+        # return self.utm_coords
     
 
 class V_1123(GenericWindTurbine):
