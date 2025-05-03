@@ -10,6 +10,17 @@ from py_wake.site._site import UniformWeibullSite, PowerShear
 from py_wake.flow_map import HorizontalGrid
 from py_wake.literature.gaussian_models import Bastankhah_PorteAgel_2014
 
+
+######################################################################################################################################
+############################# This project was developed with the help of Prof. Rafael Vallota Rodrigues #############################
+######################################################################################################################################
+
+######################################################################################################################################
+############################# Developer: Konstantinos Kalogeras ###################################################################### 
+############################# Project Partner: Dat Trinh #############################################################################
+######################################################################################################################################
+
+
 class RevolutionWind():
     def __init__(self):
         geojson_path = "E:\Spring 2025\ENGIN 480\Porject_4\Project_4_Engin_480_kalogeras_Trin\Revolution_SouthFork_Wind\Revolution_shouth_fork_turbine_position.geojson"

@@ -3,6 +3,9 @@ import geopandas as gpd
 from pyproj import Transformer
 import matplotlib.pyplot as plt
 
+
+##################################### This is a project that was developed for project 3 and has nothing to do with project 4 ################################
+
 class EnicoLuchterduinion_site:
     
     def __init__(self, geojson_path):  
