@@ -46,29 +46,6 @@ class EnedoLuchterdunen:
         return self.x, self.y
     
 
-class EnedoLuchterdunenBoundatrys:
-    def __init__(self):
-        geojson_path = 'E:\Spring 2025\ENGIN 480\Porject_4\Project_4_Engin_480_kalogeras_Trin\Eneco_Luchterdunen\eneco_luchterduinen_boundary.geojson'
-        self.gdf = gpd.read_file(geojson_path)
-
-        if self.gdf.crs is None:
-            self.gdf.set_crs(epsg=4326, inplace = True)
-
-        self.latlon_coords = np.array(self.gdf.geometry.iloc[0].coords)
-
-    def _get_utm_crs(self):
-        centroid = self.gdf.geometry.centroid.iloc[0]       
-        lon = centroid.x
-        utm_zone = int((lon + 180) / 6) + 1
-        return f"EPSG:{32600 + utm_zone}"
-
-    def get_latlon(self):
-        return self.latlon_coords
-
-    # def get_utm(self):
-        # return self.utm_coords
-    
-
 class V_1123(GenericWindTurbine):
     def __init__(self):
         """

@@ -5,7 +5,6 @@ from pyproj import Transformer
 import matplotlib.pyplot as plt
 import pandas as pd
 from py_wake.wind_turbines.generic_wind_turbines import GenericWindTurbine
-# from py_wake import NOJ
 from py_wake.site._site import UniformWeibullSite, PowerShear
 from py_wake.flow_map import HorizontalGrid
 from py_wake.literature.gaussian_models import Bastankhah_PorteAgel_2014
@@ -44,30 +43,6 @@ class CostalVirginia:
         self.y = np.array(utm_y)
     # def get_coordinates(self):
         return self.x, self.y
-    
-
-class CostalVirginiaBoundatrys:
-    def __init__(self):
-        geojson_path = 'E:\Spring 2025\ENGIN 480\Porject_4\Project_4_Engin_480_kalogeras_Trin\Costal_virginia_offshore_wind\costalvirginiaboundary.geojson'
-        self.gdf = gpd.read_file(geojson_path)
-
-        if self.gdf.crs is None:
-            self.gdf.set_crs(epsg=4326, inplace = True)
-
-        self.latlon_coords = np.array(self.gdf.geometry.iloc[0].coords)
-
-    def _get_utm_crs(self):
-        centroid = self.gdf.geometry.centroid.iloc[0]       
-        lon = centroid.x
-        utm_zone = int((lon + 180) / 6) + 1
-        return f"EPSG:{32600 + utm_zone}"
-
-    def get_latlon(self):
-        return self.latlon_coords
-
-    def get_utm(self):
-        return self.utm_coords
-    
 
 class SG_14222(GenericWindTurbine):
     def __init__(self):
